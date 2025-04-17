@@ -118,8 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       id: "deer6", // Unique ID for the new hover area
-      top: 30, // Adjust the top position to place it in the top right-hand corner
-      left: 1280, // Adjust the left position to place it in the top right-hand corner
+      top: 350, // Adjust the top position to place it in the top right-hand corner
+      left: 850, // Adjust the left position to place it in the top right-hand corner
       width: 150, // Adjust the width of the hover area
       height: 150, // Adjust the height of the hover area
       circleImage: "assets/circle_somethingelse.png", // New image for the hover area
@@ -349,6 +349,14 @@ document.addEventListener("DOMContentLoaded", () => {
       "Do one creative activity",
       "Practice Duolingo for 10 minutes",
     ],
+
+    weekly: [
+      "Drink 8 cups of water",
+      "Go to the gym 5 days in the week",
+      "journal every morning",
+      "meditate",
+      "finish the homework"
+    ]
   };
 
   // Function to get 5 random tasks from a category
@@ -363,6 +371,7 @@ document.addEventListener("DOMContentLoaded", () => {
     pet: getRandomTasks("pet"),
     friends: getRandomTasks("friends"),
     mind: getRandomTasks("mind"),
+    weekly: getRandomTasks("weekly")
   };
 
   let sortableInstance = null;
@@ -421,12 +430,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (category === "others") {
         // Create five empty tasks for the "Others" category
-        const tasks = Array(5)
-          .fill()
-          .map(() => ({
-            text: "",
-            completed: false,
-          }));
+        const tasks = hardcodedTasks["weekly"].map((task) => ({
+          text: task,
+          completed: false,
+        }));
 
         chrome.storage.local.set({
           state: {
@@ -623,10 +630,18 @@ document.addEventListener("DOMContentLoaded", () => {
     const tasksHeader =
       document.getElementById("tasks-header") || document.createElement("div");
     tasksHeader.id = "tasks-header";
-    tasksHeader.innerHTML = `
-      <h1 class="task-title">today's list</h1>
+    if(category == "others") {
+      tasksHeader.innerHTML = `
+      <h1 class="task-title"> Weekly list</h1>
       <p class="task-subtitle">some tasks to help you feel good</p>
     `;
+    } else {
+      tasksHeader.innerHTML = `
+      <h1 class="task-title"> ${category} list</h1>
+      <p class="task-subtitle">some tasks to help you feel good</p>
+    `;
+    }
+    
 
     if (!document.getElementById("tasks-header")) {
       tasksContainer.innerHTML = "";
