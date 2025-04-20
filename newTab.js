@@ -11,11 +11,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const resetYesButton = document.getElementById("reset-yes");
   const resetNoButton = document.getElementById("reset-no");
 
+  // Mood selection elements
+  const moodContainer = document.getElementById("mood-container");
+  const moodOptions = document.querySelectorAll(".mood-option");
+
   // for controlling when hovers are active
   let hoverListeners = [];
 
   // Initial background image with 5 deers
   const initialBackground = "assets/original.jpg";
+
 
   // Background images for each category
   const backgroundSets = {
@@ -118,8 +123,8 @@ document.addEventListener("DOMContentLoaded", () => {
     },
     {
       id: "deer6", // Unique ID for the new hover area
-      top: 350, // Adjust the top position to place it in the top right-hand corner
-      left: 850, // Adjust the left position to place it in the top right-hand corner
+      top: 15, // Adjust the top position to place it in the top right-hand corner
+      left: 1500, // Adjust the left position to place it in the top right-hand corner
       width: 150, // Adjust the width of the hover area
       height: 150, // Adjust the height of the hover area
       circleImage: "assets/circle_somethingelse.png", // New image for the hover area
@@ -136,18 +141,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   deerAreas.forEach((area) => {
+    
     const circle = document.getElementById(`${area.id}-circle`);
     circle.style.backgroundImage = `url(${area.circleImage})`;
+    
+    if (area.id === "deer6") {
+      circle.classList.add("active");
+    }
 
     const circleWidth = getComputedStyle(circle).width || "200px";
     const size = parseInt(circleWidth);
     circle.style.left = `${area.left + area.width / 2 - size / 2}px`;
     circle.style.top = `${area.top + area.height / 2 - size / 2}px`;
 
+
     const checkHover = (e) => {
       const mouseX = e.pageX;
       const mouseY = e.pageY;
 
+      
       if (
         mouseX >= area.left &&
         mouseX <= area.left + area.width &&
@@ -156,7 +168,9 @@ document.addEventListener("DOMContentLoaded", () => {
       ) {
         circle.classList.add("active");
       } else {
-        circle.classList.remove("active");
+        if (area.id !== "deer6") {
+          circle.classList.remove("active");
+        }
       }
     };
 
@@ -351,11 +365,9 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
 
     weekly: [
-      "Drink 8 cups of water",
-      "Go to the gym 5 days in the week",
+      "Drink 8 glasses of water each day",
+      "Take a 10-minute walk daily.",
       "journal every morning",
-      "meditate",
-      "finish the homework"
     ]
   };
 
@@ -385,7 +397,17 @@ document.addEventListener("DOMContentLoaded", () => {
         categoriesHidden,
         isFinalImage,
         selectedCategory,
+        selectedMood,
       } = data.state;
+
+      // Set the selected mood if it exists
+      if (selectedMood) {
+        moodOptions.forEach(option => {
+          if (option.dataset.mood === selectedMood) {
+            option.classList.add("selected");
+          }
+        });
+      }
 
       if (isFinalImage) {
         changeBackgroundWithSlide(
@@ -526,7 +548,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // Reattach hover listeners
     deerAreas.forEach((area) => {
       const circle = document.getElementById(`${area.id}-circle`);
-
+      
+      if (area.id === "deer6") {
+        circle.classList.add("active");
+      }
       const checkHover = (e) => {
         const mouseX = e.pageX;
         const mouseY = e.pageY;
@@ -539,7 +564,9 @@ document.addEventListener("DOMContentLoaded", () => {
         ) {
           circle.classList.add("active");
         } else {
-          circle.classList.remove("active");
+          if(area.id !== "deer6") {
+            circle.classList.remove("active");
+          }
         }
       };
 
@@ -632,8 +659,8 @@ document.addEventListener("DOMContentLoaded", () => {
     tasksHeader.id = "tasks-header";
     if(category == "others") {
       tasksHeader.innerHTML = `
-      <h1 class="task-title"> Weekly list</h1>
-      <p class="task-subtitle">some tasks to help you feel good</p>
+      <h1 class="task-title"> Weekly Challenges</h1>
+      <p class="task-subtitle">Ready for a challenge?</p>
     `;
     } else {
       tasksHeader.innerHTML = `
@@ -964,4 +991,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     tasksContainer.classList.remove("hidden");
   }
+
+  // Mood selection functionality
+  moodOptions.forEach(option => {
+    option.addEventListener("click", () => {
+      moodOptions.forEach(opt => opt.classList.remove("selected"));
+      option.classList.add("selected");
+      
+      chrome.storage.local.get("state", (data) => {
+        if (data.state) {
+          chrome.storage.local.set({
+            state: {
+              ...data.state,
+              selectedMood: option.dataset.mood
+            }
+          });
+        } else {
+          chrome.storage.local.set({
+            state: {
+              selectedMood: option.dataset.mood
+            }
+          });
+        }
+      });
+    });
+  });
 });
